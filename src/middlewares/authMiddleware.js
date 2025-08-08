@@ -30,3 +30,8 @@ export const runValidation = (req, res, next) => {
   }
   next();
 };
+
+export const loginValidation = [
+  body("username").trim().notEmpty().withMessage("Username is required"),
+  body("password").notEmpty().withMessage("Password is required"),
+];

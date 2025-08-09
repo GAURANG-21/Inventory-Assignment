@@ -1,0 +1,527 @@
+{
+  "openapi" : "3.0.3",
+  "info" : {
+    "title" : "Inventory Application API",
+    "description" : "API for user registration, authentication, product management with JWT and refresh token cookie.",
+    "version" : "1.0.0"
+  },
+  "servers" : [ {
+    "url" : "https://inventory-assignment-production.up.railway.app",
+    "description" : "Production Server"
+  } ],
+  "paths" : {
+    "/register" : {
+      "post" : {
+        "summary" : "Register a new user",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/register_body"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "User registered successfully",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_201"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad request (e.g., username exists or validation error)",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_400"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Server error"
+          }
+        }
+      }
+    },
+    "/login" : {
+      "post" : {
+        "summary" : "User login/authentication",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/login_body"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Successful login, returns access token",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_200"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid username or password",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_400_1"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Server error"
+          }
+        }
+      }
+    },
+    "/refresh-token" : {
+      "post" : {
+        "summary" : "Refresh access token using refresh token cookie",
+        "responses" : {
+          "200" : {
+            "description" : "New access token issued",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_200_1"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Refresh token missing",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_401"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Invalid or expired refresh token",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_403"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Server error"
+          }
+        }
+      }
+    },
+    "/products" : {
+      "get" : {
+        "summary" : "Get list of products",
+        "responses" : {
+          "200" : {
+            "description" : "List of products",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/inline_response_200_2"
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Server error"
+          }
+        }
+      },
+      "post" : {
+        "summary" : "Add a new product",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/products_body"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Product added successfully",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_200_2"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Validation errors or SKU exists",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_400_2"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized - missing or invalid token"
+          },
+          "500" : {
+            "description" : "Server error"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/products/{id}/quantity" : {
+      "put" : {
+        "summary" : "Update product quantity",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Product ID",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/id_quantity_body"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Quantity updated successfully",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_200_3"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad request (invalid quantity or product id)",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_400_3"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized - missing or invalid token"
+          },
+          "403" : {
+            "description" : "Forbidden - user not owner of product",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_403_1"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Product not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_404"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Server error"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "inline_response_403_1" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string",
+            "example" : "Access denied. You can only update your own products."
+          }
+        }
+      },
+      "register_body" : {
+        "required" : [ "password", "username" ],
+        "type" : "object",
+        "properties" : {
+          "username" : {
+            "type" : "string"
+          },
+          "password" : {
+            "type" : "string"
+          }
+        }
+      },
+      "products_body" : {
+        "required" : [ "description", "image_url", "name", "price", "quantity", "sku", "type" ],
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
+          },
+          "sku" : {
+            "type" : "string"
+          },
+          "image_url" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "quantity" : {
+            "type" : "integer"
+          },
+          "price" : {
+            "type" : "number"
+          }
+        }
+      },
+      "inline_response_400_3" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          }
+        }
+      },
+      "inline_response_404" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string",
+            "example" : "Product not found"
+          }
+        }
+      },
+      "login_body" : {
+        "required" : [ "password", "username" ],
+        "type" : "object",
+        "properties" : {
+          "username" : {
+            "type" : "string"
+          },
+          "password" : {
+            "type" : "string"
+          }
+        }
+      },
+      "inline_response_201" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean",
+            "example" : true
+          },
+          "message" : {
+            "type" : "string",
+            "example" : "User registered successfully"
+          },
+          "accessToken" : {
+            "type" : "string"
+          }
+        }
+      },
+      "inline_response_200_1" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean",
+            "example" : true
+          },
+          "accessToken" : {
+            "type" : "string"
+          }
+        }
+      },
+      "inline_response_200" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean",
+            "example" : true
+          },
+          "message" : {
+            "type" : "string",
+            "example" : "Login successful"
+          },
+          "accessToken" : {
+            "type" : "string"
+          }
+        }
+      },
+      "inline_response_200_2" : {
+        "type" : "object",
+        "properties" : {
+          "product_id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
+          },
+          "sku" : {
+            "type" : "string"
+          },
+          "image_url" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "quantity" : {
+            "type" : "integer"
+          },
+          "price" : {
+            "type" : "number"
+          }
+        }
+      },
+      "id_quantity_body" : {
+        "required" : [ "quantity" ],
+        "type" : "object",
+        "properties" : {
+          "quantity" : {
+            "type" : "integer"
+          }
+        }
+      },
+      "inline_response_200_3" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string",
+            "example" : "Product quantity updated successfully"
+          }
+        }
+      },
+      "inline_response_403" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string",
+            "example" : "Invalid or expired refresh token."
+          }
+        }
+      },
+      "inline_response_400_2_errors" : {
+        "type" : "object",
+        "properties" : {
+          "msg" : {
+            "type" : "string"
+          },
+          "param" : {
+            "type" : "string"
+          },
+          "location" : {
+            "type" : "string"
+          }
+        }
+      },
+      "inline_response_401" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string",
+            "example" : "Refresh token not found, please login again."
+          }
+        }
+      },
+      "inline_response_400_2" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          },
+          "errors" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/inline_response_400_2_errors"
+            }
+          }
+        }
+      },
+      "inline_response_400" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string",
+            "example" : "Username already exists"
+          },
+          "errors" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/inline_response_400_2_errors"
+            }
+          }
+        }
+      },
+      "inline_response_400_1" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string",
+            "example" : "Invalid username or password."
+          }
+        }
+      }
+    },
+    "securitySchemes" : {
+      "bearerAuth" : {
+        "type" : "http",
+        "scheme" : "bearer",
+        "bearerFormat" : "JWT"
+      }
+    }
+  }
+}

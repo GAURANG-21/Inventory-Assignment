@@ -1,13 +1,15 @@
 import express from "express";
 import dotenv from "dotenv";
-import {authRoutes} from "./routes/index.js"
+import { authRoutes, productRoutes } from "./routes/index.js";
 import morgan from "morgan";
 import chalk from "chalk";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
 morgan.token("statusColor", (req, res) => {
   const status = res.statusCode;
@@ -21,11 +23,16 @@ morgan.token("statusColor", (req, res) => {
 morgan.token("methodEmoji", (req) => {
   const method = req.method;
   switch (method) {
-    case "GET": return "🟢 GET";
-    case "POST": return "🟡 POST";
-    case "PUT": return "🟠 PUT";
-    case "DELETE": return "🔴 DELETE";
-    default: return method;
+    case "GET":
+      return "🟢 GET";
+    case "POST":
+      return "🟡 POST";
+    case "PUT":
+      return "🟠 PUT";
+    case "DELETE":
+      return "🔴 DELETE";
+    default:
+      return method;
   }
 });
 
@@ -42,7 +49,7 @@ app.use(
   })
 );
 
-
 app.use("/", authRoutes);
+app.use("/", productRoutes);
 
 export default app;

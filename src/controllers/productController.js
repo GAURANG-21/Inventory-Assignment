@@ -1,3 +1,5 @@
+import prisma from "../config/db.js";
+
 export const addAProduct = async (req, res) => {
   try {
     const userId = req.user?.id;

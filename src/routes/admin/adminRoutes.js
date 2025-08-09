@@ -7,6 +7,7 @@ import {
 import { registerValidation } from "../../middlewares/authMiddleware.js";
 import {
   createUserByAdmin,
+  deleteUser,
   editUserByAdmin,
   getAllUsers,
 } from "../../controllers/userController.js";
@@ -33,5 +34,7 @@ router.put(
   runValidation,
   editUserByAdmin
 );
+
+router.delete("/deleteUser/:id", authorization, adminAccessibility, deleteUser);
 
 export default router;

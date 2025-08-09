@@ -142,3 +142,38 @@ export const editUserByAdmin = async (req, res) => {
     });
   }
 };
+
+export const deleteUser = async (req, res) => {
+  try {
+    let { id } = req.params;
+    id = Number(id);
+
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User doesn't exist",
+      });
+    }
+
+    if (req.user?.id === id) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot delete your own account",
+      });
+    }
+
+    await prisma.user.delete({ where: { id } });
+
+    return res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
+    });
+  } catch (error) {
+    console.error("❌ Delete user error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while deleting user",
+    });
+  }
+};

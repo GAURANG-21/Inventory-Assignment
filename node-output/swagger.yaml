@@ -10,14 +10,17 @@
     "description" : "Production Server"
   } ],
   "paths" : {
-    "/register" : {
+    "/createUser" : {
       "post" : {
-        "summary" : "Register a new user",
+        "tags" : [ "Admin" ],
+        "summary" : "Create a new user (Admin only)",
         "requestBody" : {
           "content" : {
             "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/register_body"
+              "example" : {
+                "password" : "Password@123",
+                "role" : "USER",
+                "username" : "new_user"
               }
             }
           },
@@ -25,29 +28,137 @@
         },
         "responses" : {
           "201" : {
-            "description" : "User registered successfully",
+            "description" : "User created successfully",
             "content" : {
               "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/inline_response_201"
+                "example" : {
+                  "message" : "User created successfully",
+                  "success" : true,
+                  "user" : {
+                    "createdAt" : "2025-08-09T10:00:00Z",
+                    "id" : 3,
+                    "role" : "USER",
+                    "username" : "new_user"
+                  }
                 }
               }
             }
           },
           "400" : {
-            "description" : "Bad request (e.g., username exists or validation error)",
+            "description" : "Validation error"
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          },
+          "403" : {
+            "description" : "Forbidden: Admin access required"
+          },
+          "409" : {
+            "description" : "Username already exists"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/editUser/{id}" : {
+      "put" : {
+        "tags" : [ "Admin" ],
+        "summary" : "Edit an existing user (Admin only)",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "User ID",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "example" : {
+                "password" : "NewPassword@123",
+                "role" : "ADMIN",
+                "username" : "updated_user"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "User updated successfully",
             "content" : {
               "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/inline_response_400"
+                "example" : {
+                  "message" : "User updated successfully",
+                  "success" : true,
+                  "user" : {
+                    "id" : 3,
+                    "role" : "ADMIN",
+                    "username" : "updated_user"
+                  }
                 }
               }
             }
           },
-          "500" : {
-            "description" : "Server error"
+          "400" : {
+            "description" : "Validation error or no fields to update"
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          },
+          "403" : {
+            "description" : "Forbidden: Admin access required"
+          },
+          "404" : {
+            "description" : "User not found"
           }
-        }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/getUsers" : {
+      "get" : {
+        "tags" : [ "Admin" ],
+        "summary" : "Get all users (Admin Only)",
+        "responses" : {
+          "200" : {
+            "description" : "List of all users",
+            "content" : {
+              "application/json" : {
+                "example" : {
+                  "count" : 2,
+                  "success" : true,
+                  "users" : [ {
+                    "id" : 1,
+                    "role" : "USER",
+                    "username" : "john_doe"
+                  }, {
+                    "id" : 2,
+                    "role" : "ADMIN",
+                    "username" : "admin_user"
+                  } ]
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          },
+          "403" : {
+            "description" : "Forbidden: Admin access required"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
       }
     },
     "/login" : {
@@ -80,46 +191,6 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/inline_response_400_1"
-                }
-              }
-            }
-          },
-          "500" : {
-            "description" : "Server error"
-          }
-        }
-      }
-    },
-    "/refresh-token" : {
-      "post" : {
-        "summary" : "Refresh access token using refresh token cookie",
-        "responses" : {
-          "200" : {
-            "description" : "New access token issued",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/inline_response_200_1"
-                }
-              }
-            }
-          },
-          "401" : {
-            "description" : "Refresh token missing",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/inline_response_401"
-                }
-              }
-            }
-          },
-          "403" : {
-            "description" : "Invalid or expired refresh token",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/inline_response_403"
                 }
               }
             }
@@ -273,55 +344,230 @@
           "bearerAuth" : [ ]
         } ]
       }
+    },
+    "/refresh-token" : {
+      "post" : {
+        "summary" : "Refresh access token using refresh token cookie",
+        "responses" : {
+          "200" : {
+            "description" : "New access token issued",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_200_1"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Refresh token missing",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_401"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Invalid or expired refresh token",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_403"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Server error"
+          }
+        }
+      }
+    },
+    "/register" : {
+      "post" : {
+        "summary" : "Register a new user",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/register_body"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "User registered successfully",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_201"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad request (e.g., username exists or validation error)",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_400"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Server error"
+          }
+        }
+      }
     }
   },
   "components" : {
     "schemas" : {
-      "inline_response_403_1" : {
+      "id_quantity_body" : {
+        "required" : [ "quantity" ],
         "type" : "object",
         "properties" : {
+          "quantity" : {
+            "type" : "integer"
+          }
+        }
+      },
+      "inline_response_200" : {
+        "type" : "object",
+        "properties" : {
+          "accessToken" : {
+            "type" : "string"
+          },
           "message" : {
             "type" : "string",
-            "example" : "Access denied. You can only update your own products."
+            "example" : "Login successful"
+          },
+          "success" : {
+            "type" : "boolean",
+            "example" : true
           }
         }
       },
-      "register_body" : {
-        "required" : [ "password", "username" ],
+      "inline_response_200_1" : {
         "type" : "object",
         "properties" : {
-          "username" : {
+          "accessToken" : {
             "type" : "string"
           },
-          "password" : {
-            "type" : "string"
+          "success" : {
+            "type" : "boolean",
+            "example" : true
           }
         }
       },
-      "products_body" : {
-        "required" : [ "description", "image_url", "name", "price", "quantity", "sku", "type" ],
+      "inline_response_200_2" : {
         "type" : "object",
         "properties" : {
-          "name" : {
-            "type" : "string"
-          },
-          "type" : {
-            "type" : "string"
-          },
-          "sku" : {
+          "description" : {
             "type" : "string"
           },
           "image_url" : {
             "type" : "string"
           },
-          "description" : {
+          "name" : {
+            "type" : "string"
+          },
+          "price" : {
+            "type" : "number"
+          },
+          "product_id" : {
             "type" : "string"
           },
           "quantity" : {
             "type" : "integer"
           },
-          "price" : {
-            "type" : "number"
+          "sku" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
+          }
+        }
+      },
+      "inline_response_200_3" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string",
+            "example" : "Product quantity updated successfully"
+          }
+        }
+      },
+      "inline_response_201" : {
+        "type" : "object",
+        "properties" : {
+          "accessToken" : {
+            "type" : "string"
+          },
+          "message" : {
+            "type" : "string",
+            "example" : "User registered successfully"
+          },
+          "success" : {
+            "type" : "boolean",
+            "example" : true
+          }
+        }
+      },
+      "inline_response_400" : {
+        "type" : "object",
+        "properties" : {
+          "errors" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/inline_response_400_2_errors"
+            }
+          },
+          "message" : {
+            "type" : "string",
+            "example" : "Username already exists"
+          }
+        }
+      },
+      "inline_response_400_1" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string",
+            "example" : "Invalid username or password."
+          }
+        }
+      },
+      "inline_response_400_2" : {
+        "type" : "object",
+        "properties" : {
+          "errors" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/inline_response_400_2_errors"
+            }
+          },
+          "message" : {
+            "type" : "string"
+          }
+        }
+      },
+      "inline_response_400_2_errors" : {
+        "type" : "object",
+        "properties" : {
+          "location" : {
+            "type" : "string"
+          },
+          "msg" : {
+            "type" : "string"
+          },
+          "param" : {
+            "type" : "string"
           }
         }
       },
@@ -330,6 +576,33 @@
         "properties" : {
           "message" : {
             "type" : "string"
+          }
+        }
+      },
+      "inline_response_401" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string",
+            "example" : "Refresh token not found, please login again."
+          }
+        }
+      },
+      "inline_response_403" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string",
+            "example" : "Invalid or expired refresh token."
+          }
+        }
+      },
+      "inline_response_403_1" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string",
+            "example" : "Access denied. You can only update your own products."
           }
         }
       },
@@ -346,172 +619,50 @@
         "required" : [ "password", "username" ],
         "type" : "object",
         "properties" : {
-          "username" : {
-            "type" : "string"
-          },
           "password" : {
             "type" : "string"
-          }
-        }
-      },
-      "inline_response_201" : {
-        "type" : "object",
-        "properties" : {
-          "success" : {
-            "type" : "boolean",
-            "example" : true
           },
-          "message" : {
-            "type" : "string",
-            "example" : "User registered successfully"
-          },
-          "accessToken" : {
+          "username" : {
             "type" : "string"
           }
         }
       },
-      "inline_response_200_1" : {
+      "products_body" : {
+        "required" : [ "description", "image_url", "name", "price", "quantity", "sku", "type" ],
         "type" : "object",
         "properties" : {
-          "success" : {
-            "type" : "boolean",
-            "example" : true
-          },
-          "accessToken" : {
-            "type" : "string"
-          }
-        }
-      },
-      "inline_response_200" : {
-        "type" : "object",
-        "properties" : {
-          "success" : {
-            "type" : "boolean",
-            "example" : true
-          },
-          "message" : {
-            "type" : "string",
-            "example" : "Login successful"
-          },
-          "accessToken" : {
-            "type" : "string"
-          }
-        }
-      },
-      "inline_response_200_2" : {
-        "type" : "object",
-        "properties" : {
-          "product_id" : {
-            "type" : "string"
-          },
-          "name" : {
-            "type" : "string"
-          },
-          "type" : {
-            "type" : "string"
-          },
-          "sku" : {
+          "description" : {
             "type" : "string"
           },
           "image_url" : {
             "type" : "string"
           },
-          "description" : {
+          "name" : {
             "type" : "string"
-          },
-          "quantity" : {
-            "type" : "integer"
           },
           "price" : {
             "type" : "number"
-          }
-        }
-      },
-      "id_quantity_body" : {
-        "required" : [ "quantity" ],
-        "type" : "object",
-        "properties" : {
+          },
           "quantity" : {
             "type" : "integer"
-          }
-        }
-      },
-      "inline_response_200_3" : {
-        "type" : "object",
-        "properties" : {
-          "message" : {
-            "type" : "string",
-            "example" : "Product quantity updated successfully"
-          }
-        }
-      },
-      "inline_response_403" : {
-        "type" : "object",
-        "properties" : {
-          "message" : {
-            "type" : "string",
-            "example" : "Invalid or expired refresh token."
-          }
-        }
-      },
-      "inline_response_400_2_errors" : {
-        "type" : "object",
-        "properties" : {
-          "msg" : {
+          },
+          "sku" : {
             "type" : "string"
           },
-          "param" : {
-            "type" : "string"
-          },
-          "location" : {
+          "type" : {
             "type" : "string"
           }
         }
       },
-      "inline_response_401" : {
+      "register_body" : {
+        "required" : [ "password", "username" ],
         "type" : "object",
         "properties" : {
-          "message" : {
-            "type" : "string",
-            "example" : "Refresh token not found, please login again."
-          }
-        }
-      },
-      "inline_response_400_2" : {
-        "type" : "object",
-        "properties" : {
-          "message" : {
+          "password" : {
             "type" : "string"
           },
-          "errors" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/inline_response_400_2_errors"
-            }
-          }
-        }
-      },
-      "inline_response_400" : {
-        "type" : "object",
-        "properties" : {
-          "message" : {
-            "type" : "string",
-            "example" : "Username already exists"
-          },
-          "errors" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/inline_response_400_2_errors"
-            }
-          }
-        }
-      },
-      "inline_response_400_1" : {
-        "type" : "object",
-        "properties" : {
-          "message" : {
-            "type" : "string",
-            "example" : "Invalid username or password."
+          "username" : {
+            "type" : "string"
           }
         }
       }

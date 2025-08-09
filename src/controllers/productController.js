@@ -49,3 +49,49 @@ export const addAProduct = async (req, res) => {
     });
   }
 };
+
+export const updateProductQuantity = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized user" });
+    }
+
+    const productId = parseInt(req.params.id, 10);
+    if (isNaN(productId)) {
+      return res.status(400).json({ message: "Invalid product ID" });
+    }
+
+    const { quantity } = req.body;
+    if (quantity === undefined || !Number.isInteger(quantity) || quantity < 0) {
+      return res
+        .status(400)
+        .json({ message: "Quantity must be a non-negative integer" });
+    }
+
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    if (product.userId !== userId) {
+      return res
+        .status(403)
+        .json({
+          message: "Access denied. You can only update your own products.",
+        });
+    }
+
+    await prisma.product.update({
+      where: { id: productId },
+      data: { quantity },
+    });
+
+    return res.json({ message: "Product quantity updated successfully" });
+  } catch (error) {
+    console.error("Error updating product quantity:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};

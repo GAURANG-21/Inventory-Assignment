@@ -34,6 +34,14 @@ export const productValidation = [
     .withMessage("Price must be a non-negative number"),
 ];
 
+export const validateQuantity = [
+  body("quantity")
+    .exists()
+    .withMessage("Quantity is required")
+    .isInt({ min: 0 })
+    .withMessage("Quantity must be a non-negative integer"),
+];
+
 export const runValidation = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {

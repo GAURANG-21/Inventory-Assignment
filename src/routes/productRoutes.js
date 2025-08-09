@@ -2,7 +2,6 @@ import express from "express";
 import { authorization } from "../middlewares/authorization.js";
 import {
   productValidation,
-  runValidation,
   validateQuantity,
 } from "../middlewares/productMiddleware.js";
 import {
@@ -10,6 +9,7 @@ import {
   getProducts,
   updateProductQuantity,
 } from "../controllers/productController.js";
+import { runValidation } from "../middlewares/validator.js";
 
 const router = express.Router();
 

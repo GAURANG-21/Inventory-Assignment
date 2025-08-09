@@ -1,15 +1,21 @@
 import express from "express";
 import { authorization } from "../../middlewares/authorization.js";
-import { adminAccessibility } from "../../middlewares/adminMiddleware.js";
 import {
-  registerValidation,
-  runValidation,
-} from "../../middlewares/authMiddleware.js";
-import { createUserByAdmin, getAllUsers } from "../../controllers/userController.js";
+  adminAccessibility,
+  editUserValidation,
+} from "../../middlewares/adminMiddleware.js";
+import { registerValidation } from "../../middlewares/authMiddleware.js";
+import {
+  createUserByAdmin,
+  editUserByAdmin,
+  getAllUsers,
+} from "../../controllers/userController.js";
+import { runValidation } from "../../middlewares/validator.js";
 
 const router = express.Router();
 
 router.get("/getUsers", authorization, adminAccessibility, getAllUsers);
+
 router.post(
   "/createUser",
   authorization,
@@ -17,6 +23,15 @@ router.post(
   registerValidation,
   runValidation,
   createUserByAdmin
+);
+
+router.put(
+  "/editUser/:id",
+  authorization,
+  adminAccessibility,
+  editUserValidation,
+  runValidation,
+  editUserByAdmin
 );
 
 export default router;

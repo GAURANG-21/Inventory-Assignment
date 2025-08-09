@@ -2,13 +2,13 @@ import express from "express";
 import {
   loginValidation,
   registerValidation,
-  runValidation,
 } from "../middlewares/authMiddleware.js";
 import {
   loginUser,
   refreshAccessToken,
   registerUser,
 } from "../controllers/authController.js";
+import { runValidation } from "../middlewares/validator.js";
 
 const router = express.Router();
 

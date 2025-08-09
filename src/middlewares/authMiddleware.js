@@ -1,4 +1,4 @@
-import { body, validationResult } from "express-validator";
+import { body } from "express-validator";
 
 export const registerValidation = [
   body("username")
@@ -25,14 +25,6 @@ export const registerValidation = [
     .isIn(["USER", "ADMIN"])
     .withMessage("Role must be either USER or ADMIN"),
 ];
-
-export const runValidation = (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  next();
-};
 
 export const loginValidation = [
   body("username").trim().notEmpty().withMessage("Username is required"),

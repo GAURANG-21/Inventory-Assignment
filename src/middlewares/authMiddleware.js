@@ -20,6 +20,10 @@ export const registerValidation = [
     .withMessage("Password must contain at least one number")
     .matches(/[@$!%*?&]/)
     .withMessage("Password must contain at least one special character"),
+  body("role")
+    .optional()
+    .isIn(["USER", "ADMIN"])
+    .withMessage("Role must be either USER or ADMIN"),
 ];
 
 export const runValidation = (req, res, next) => {

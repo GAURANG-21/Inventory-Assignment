@@ -8,7 +8,7 @@ import jwt from "jsonwebtoken"
 
 export const registerUser = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, role } = req.body;
     const cleanUsername = username.trim();
 
     const existingUser = await prisma.user.findUnique({
@@ -28,11 +28,12 @@ export const registerUser = async (req, res) => {
       data: {
         username: cleanUsername,
         password: hashedPassword,
+        role: role || "USER"
       },
     });
 
-    const accessToken = await generateAccessToken({ id: newUser.id });
-    const refreshToken = await generateRefreshToken({ id: newUser.id });
+    const accessToken = await generateAccessToken({ id: newUser.id, role: newUser.role });
+    const refreshToken = await generateRefreshToken({ id: newUser.id, role: newUser.role });
 
     const hashedRefreshToken = await bcrypt.hash(
       refreshToken,
@@ -83,8 +84,8 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid username or password." });
     }
 
-    const accessToken = await generateAccessToken({ id: user.id });
-    const refreshToken = await generateRefreshToken({ id: user.id });
+    const accessToken = await generateAccessToken({ id: user.id, role: user.role });
+    const refreshToken = await generateRefreshToken({ id: user.id, role: user.role });
 
     const hashedRefreshToken = await bcrypt.hash(
       refreshToken,
@@ -144,8 +145,8 @@ export const refreshAccessToken = async (req, res) => {
     if (!isTokenValid)
       return res.status(403).json({ message: "Refresh token does not match." });
 
-    const newAccessToken = await generateAccessToken({ id: user.id });
-    const newRefreshToken = await generateRefreshToken({ id: user.id });
+    const newAccessToken = await generateAccessToken({ id: user.id, role: user.role });
+    const newRefreshToken = await generateRefreshToken({ id: user.id, role: user.role });
 
     const hashedRefreshToken = await bcrypt.hash(
       newRefreshToken,

@@ -1,6 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
-import { authRoutes, productRoutes } from "./routes/index.js";
+import { adminRoutes, authRoutes, productRoutes } from "./routes/index.js";
 import morgan from "morgan";
 import chalk from "chalk";
 import cookieParser from "cookie-parser";
@@ -51,5 +51,6 @@ app.use(
 
 app.use("/", authRoutes);
 app.use("/", productRoutes);
+app.use("/admin/", adminRoutes);
 
 export default app;

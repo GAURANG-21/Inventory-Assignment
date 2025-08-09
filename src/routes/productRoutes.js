@@ -7,6 +7,7 @@ import {
 } from "../middlewares/productMiddleware.js";
 import {
   addAProduct,
+  getProducts,
   updateProductQuantity,
 } from "../controllers/productController.js";
 
@@ -27,5 +28,7 @@ router.put(
   runValidation,
   updateProductQuantity
 );
+
+router.get("/products", getProducts);
 
 export default router;

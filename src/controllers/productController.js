@@ -77,11 +77,9 @@ export const updateProductQuantity = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
     if (product.userId !== userId) {
-      return res
-        .status(403)
-        .json({
-          message: "Access denied. You can only update your own products.",
-        });
+      return res.status(403).json({
+        message: "Access denied. You can only update your own products.",
+      });
     }
 
     await prisma.product.update({
@@ -92,6 +90,39 @@ export const updateProductQuantity = async (req, res) => {
     return res.json({ message: "Product quantity updated successfully" });
   } catch (error) {
     console.error("Error updating product quantity:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getProducts = async (req, res) => {
+  try {
+    const products = await prisma.product.findMany({
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        sku: true,
+        image_url: true,
+        description: true,
+        quantity: true,
+        price: true,
+      },
+    });
+
+    const formattedProducts = products.map((p) => ({
+      product_id: p.id.toString(),
+      name: p.name,
+      type: p.type,
+      sku: p.sku,
+      image_url: p.image_url,
+      description: p.description,
+      quantity: p.quantity,
+      price: p.price,
+    }));
+
+    return res.json(formattedProducts);
+  } catch (error) {
+    console.error("Error fetching products:", error);
     return res.status(500).json({ message: "Server error" });
   }
 };

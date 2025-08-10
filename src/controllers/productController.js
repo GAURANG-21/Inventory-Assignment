@@ -98,7 +98,20 @@ export const updateProductQuantity = async (req, res) => {
 
 export const getProducts = async (req, res) => {
   try {
+    let page = parseInt(req.query.page, 10) || 1;
+    let limit = parseInt(req.query.limit, 10) || 10;
+
+    // Validation & sanitization
+    page = Math.max(1, page);
+    limit = Math.min(5, Math.max(1, limit));
+
+    const skip = (page - 1) * limit;
+
+    const totalCount = await prisma.product.count();
+
     const products = await prisma.product.findMany({
+      skip,
+      take: limit,
       select: {
         id: true,
         name: true,
@@ -109,6 +122,7 @@ export const getProducts = async (req, res) => {
         quantity: true,
         price: true,
       },
+      orderBy: { id: "asc" },
     });
 
     const formattedProducts = products.map((p) => ({
@@ -122,7 +136,14 @@ export const getProducts = async (req, res) => {
       price: p.price,
     }));
 
-    return res.json(formattedProducts);
+    const totalPages = Math.ceil(totalCount / limit);
+
+    return res.json({
+      totalCount,
+      page,
+      totalPages,
+      products: formattedProducts,
+    });
   } catch (error) {
     console.error("Error fetching products:", error);
     return res.status(500).json({ message: "Server error" });

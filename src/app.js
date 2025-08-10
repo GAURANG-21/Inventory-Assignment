@@ -4,6 +4,7 @@ import { adminRoutes, authRoutes, productRoutes } from "./routes/index.js";
 import morgan from "morgan";
 import chalk from "chalk";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 
 dotenv.config();
 
@@ -58,5 +59,12 @@ app.use(
 app.use("/", authRoutes);
 app.use("/", productRoutes);
 app.use("/admin/", adminRoutes);
+app.get("/", (req, res) => {
+  res.send(`
+    <h1>Server is active!</h1>
+    <p>Frontend URL: <a href="${process.env.FRONTEND_URL}" target="_blank" rel="noopener noreferrer">${process.env.FRONTEND_URL}</a></p>
+    <p>API documentation available at <a href="/docs" target="_blank" rel="noopener noreferrer">/docs</a></p>
+  `);
+});
 
 export default app;
